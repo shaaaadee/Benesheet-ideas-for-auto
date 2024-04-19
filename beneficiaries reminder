@@ -1,0 +1,51 @@
+function sendEmailIfCheckboxUnchecked() {
+  // Display a confirmation dialog
+  var response = Browser.msgBox(
+    "Confirmation",
+    "Are you sure you want to send the email?",
+    Browser.Buttons.YES_NO
+  );
+
+  // Check the user's response
+  if (response == "yes") {
+    // Access the active sheet
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+
+    // Get the data range for columns U and Y
+    var range = sheet.getRange("U:Y");
+    var dropdownColumn = sheet.getRange("N:N"); // Get the entire column for dropdown
+
+    // Get all values in columns U (checkboxes) and Y (email addresses)
+    var values = range.getValues();
+    var dropdownValues = dropdownColumn.getValues(); // Get values of dropdown column
+
+    // Iterate through each row in columns U and Y
+    for (var i = 0; i < values.length; i++) {
+      var checkboxValue = values[i][0];
+      var emailRecipients = values[i][4].split(';').map(function(email) { return email.trim(); }); // Assuming email addresses are in column Y
+      
+      // Get the value of the dropdown for this row
+      var dropdownValue = dropdownValues[i][0]; // Assuming dropdown values are in the same row as the checkboxes
+      
+      // Check if checkbox is not checked (assuming unchecked checkbox value is false) and dropdown value is not "cancelled"
+      if (checkboxValue !== true && dropdownValue.toLowerCase() !== "cancelled") {
+        // Iterate through each email address in the cell (delimited by semicolon)
+        for (var j = 0; j < emailRecipients.length; j++) {
+          var emailRecipient = emailRecipients[j];
+
+          // Send email
+          if (emailRecipient) {
+            // Customize your email message here
+            var subject = "Reminder: Please check the checkbox";
+            var message = "Hello,\n\nYou haven't checked the checkbox. Please do so.\n\nThank you.";
+
+            // Send email
+            MailApp.sendEmail(emailRecipient, subject, message);
+          }
+        }
+      }
+    }
+  } else {
+    showAlert();
+  }
+}

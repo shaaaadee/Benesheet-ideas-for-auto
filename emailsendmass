@@ -1,0 +1,60 @@
+ var response = Browser.msgBox(
+          "Confirmation",
+          "Are you sure you want to send the email?",
+           Browser.Buttons.YES_NO
+        );
+        
+        if (response == "yes") { 
+          sendEmails();
+        }
+        else{
+               
+               showAlert();
+
+        }
+        function showAlert() 
+        {
+  var ui = SpreadsheetApp.getUi();
+
+  var result = ui.alert(
+     'end emailer',
+     'emailer has stopped.',
+      ui.ButtonSet.OK);
+}
+
+function sendEmails() {
+ 
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = sheet.getDataRange().getValues(); // Assuming data starts from the first row
+  
+  for (var i = 1; i < data.length; i++) { // Assuming the first row contains headers
+    var row = data[i];
+    var name = row[0]; // Assuming the recipient's name is in the first column
+    var emailAddresses = row[1].split(";"); // Assuming email addresses are in the second column and delimited by semicolon
+    var subject = "Your subject here";
+    var message = "Dear " + name + ",\n\n" + "Your message here"; // Construct message with recipient's name
+    
+    for (var j = 0; j < emailAddresses.length; j++) {
+      var emailAddress = emailAddresses[j].trim(); // Trim whitespace around email address
+    
+
+
+      
+    }
+    if ( emailAddress !== "" ) { // Check if email address is not empty
+        GmailApp.sendEmail(emailAddress, subject, message);
+
+ 
+      }
+  
+  }  
+     
+} 
+
+
+function onOpen() {
+  var ui = SpreadsheetApp.getUi();
+  ui.createMenu('Emailer')
+      .addItem('Send Emails', 'sendEmails')
+      .addToUi();
+}

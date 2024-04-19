@@ -1,3 +1,5 @@
+   
+function sendEmails() {
  var response = Browser.msgBox(
           "Confirmation",
           "Are you sure you want to send the email?",
@@ -5,25 +7,7 @@
         );
         
         if (response == "yes") { 
-          sendEmails();
-        }
-        else{
-               
-               showAlert();
-
-        }
-        function showAlert() 
-        {
-  var ui = SpreadsheetApp.getUi();
-
-  var result = ui.alert(
-     'end emailer',
-     'emailer has stopped.',
-      ui.ButtonSet.OK);
-}
-
-function sendEmails() {
- 
+        
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   var data = sheet.getDataRange().getValues(); // Assuming data starts from the first row
   
@@ -57,4 +41,19 @@ function onOpen() {
   ui.createMenu('Emailer')
       .addItem('Send Emails', 'sendEmails')
       .addToUi();
+}
+}
+  else{
+               
+               showAlert();
+
+        }
+        function showAlert() 
+        {
+  var ui = SpreadsheetApp.getUi();
+
+  var result = ui.alert(
+     'end emailer',
+     'emailer has stopped.',
+      ui.ButtonSet.OK);
 }

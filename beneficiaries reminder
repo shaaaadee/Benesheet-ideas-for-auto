@@ -1,28 +1,33 @@
 function sendEmailIfCheckboxUnchecked() {
   // Display a confirmation dialog
-  var response = Browser.msgBox(
+  var ui = SpreadsheetApp.getUi();
+  var response = ui.alert(
     "Confirmation",
     "Are you sure you want to send the email?",
-    Browser.Buttons.YES_NO
+    ui.ButtonSet.YES_NO
   );
 
   // Check the user's response
-  if (response == "yes") {
-    // Access the active sheet
+  if (response == ui.Button.YES) {
+
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
 
-    // Get the data range for columns U and Y
-    var range = sheet.getRange("U:Y");
-    var dropdownColumn = sheet.getRange("N:N"); // Get the entire column for dropdown
+    // Get the data range for columns C to Z
+    var range = sheet.getRange("C:Z");
+    var dropdownColumn = sheet.getRange("O:O"); // Get the entire column for dropdown
 
-    // Get all values in columns U (checkboxes) and Y (email addresses)
+    // Get all values in columns C (company), D (batch), S (name), S (checkboxes), and X (email addresses)
     var values = range.getValues();
     var dropdownValues = dropdownColumn.getValues(); // Get values of dropdown column
 
-    // Iterate through each row in columns U and Y
+    // Iterate through each row in columns C, D, S, S, and X
     for (var i = 0; i < values.length; i++) {
-      var checkboxValue = values[i][0];
-      var emailRecipients = values[i][4].split(';').map(function(email) { return email.trim(); }); // Assuming email addresses are in column Y
+      var company = values[i][0];
+      var batch = values[i][1]; // Assuming the batch is in column D
+      var fullName = values[i][7]; // Assuming the name is in column S
+      var firstName = fullName.split(" ")[0]; // Extract the first name
+      var checkboxValue = values[i][19];
+      var emailRecipients = values[i][23].split(';').map(function(email) { return email.trim(); }); // Assuming email addresses are in column Y
       
       // Get the value of the dropdown for this row
       var dropdownValue = dropdownValues[i][0]; // Assuming dropdown values are in the same row as the checkboxes
@@ -32,15 +37,40 @@ function sendEmailIfCheckboxUnchecked() {
         // Iterate through each email address in the cell (delimited by semicolon)
         for (var j = 0; j < emailRecipients.length; j++) {
           var emailRecipient = emailRecipients[j];
-
-          // Send email
+          
+          // Send email if the email recipient is valid
           if (emailRecipient) {
             // Customize your email message here
-            var subject = "Reminder: Please check the checkbox";
-            var message = "Hello,\n\nYou haven't checked the checkbox. Please do so.\n\nThank you.";
-
-            // Send email
-            MailApp.sendEmail(emailRecipient, subject, message);
+            var subject = "Reminder: Request for laptop : " + company;
+            var message = "Dear " + firstName + ",\n\n" +
+              "This is regarding your request for laptop(s) from Engineering Good. We are pleased to inform you that the laptop(s) are ready for collection.\n\n" +
+              "I kindly request you to sign the Delivery Order (DO) attached in this email, digitally, and email it back to me. Alternatively, you may sign it physically by printing and bringing it along during your visit.\n\n" +
+              "You are welcome to collect the laptop(s) from our Bendemeer office at the following address, anytime during our office hours, with or without an appointment:\n\n" +
+              "Address:\n" +
+              "B-Central, 994 Bendemeer Road, #02-04,\n" +
+              "Singapore 339943\n\n" +
+              "Nearest MRT exit:\n" +
+              "Boon Keng MRT station Exit B.\n\n" +
+              "Office hours:\n" +
+              "On weekdays, from 10 a.m. to 6 p.m. (excluding Public Holidays)\n\n" +
+              "If you have any further questions or concerns, please do not hesitate to contact us at 81246085.\n\n" +
+              "Thank you.\n\n Sandeep Dadwall - Project Executive";
+            
+            // Search for the attachment based on company and batch
+            var attachment = findAttachmentInFolder("https://drive.google.com/drive/folders/1r8cBIVRzlKttk4NjuYviwl2L3_rYIxd0?usp=drive_link", company, batch); // Replace with your folder URL
+            
+            if (attachment) {
+              // Send email with attachment
+              MailApp.sendEmail({
+                to: emailRecipient,
+                subject: subject,
+                body: message,
+                attachments: [attachment.getAs(MimeType.PDF)] // Attach the document as PDF
+              });
+            } else {
+              // Log the error
+              Logger.log("Attachment not found for company: " + company + " and batch: " + batch);
+            }
           }
         }
       }
@@ -48,4 +78,58 @@ function sendEmailIfCheckboxUnchecked() {
   } else {
     showAlert();
   }
+}
+
+// Function to find attachment based on company and batch within a specific folder
+function findAttachmentInFolder(folderUrl, company, batch) {
+  // Extract folder ID from folder URL
+  var folderId = getFolderIdFromUrl(folderUrl);
+  
+  if (folderId) {
+    // Get folder by ID
+    var folder = DriveApp.getFolderById(folderId);
+    var files = folder.getFiles();
+    
+    // Iterate through files in the folder
+    while (files.hasNext()) {
+      var file = files.next();
+      var fileName = file.getName();
+      
+      // Check if the file name contains the company name and batch
+      if (fileName.indexOf(company) !== -1 && fileName.indexOf(batch) !== -1) {
+        return file;
+      }
+    }
+  } else {
+    Logger.log("Folder not found for URL: " + folderUrl);
+  }
+  
+  return null; // Return null if no attachment is found
+}
+
+// Function to extract folder ID from Google Drive folder URL
+function getFolderIdFromUrl(url) {
+  var id = "";
+  var match = /\/folders\/([a-zA-Z0-9-_]+)/.exec(url);
+  if (match) {
+    id = match[1];
+  }
+  return id;
+}
+
+function onOpen() {
+  var ui = SpreadsheetApp.getUi();
+  ui.createMenu('Emailer')
+      .addItem('Send Emails', 'sendEmailIfCheckboxUnchecked')
+      .addToUi();
+}
+
+function showAlert() {
+  var ui = SpreadsheetApp.getUi();
+
+  var result = ui.alert(
+    'End Emailer',
+    'Emailer has stopped.',
+    ui.ButtonSet.OK
+  );
 }

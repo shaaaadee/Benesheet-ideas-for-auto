@@ -29,11 +29,11 @@ function sendEmailIfCheckboxUnchecked() {
       var checkboxValue = values[i][19];
       var emailRecipients = values[i][23].split(';').map(function(email) { return email.trim(); }); // Assuming email addresses are in column Y
       
-      // Get the value of the dropdown for this row
+      // Get the value of the dropdown for this row    
       var dropdownValue = dropdownValues[i][0]; // Assuming dropdown values are in the same row as the checkboxes
       
       // Check if checkbox is not checked (assuming unchecked checkbox value is false) and dropdown value is not "cancelled"
-      if (checkboxValue !== true && dropdownValue.toLowerCase() !== "cancelled") {
+      if (checkboxValue !== true && dropdownValue.toLowerCase() !== "cancelled"&& dropdownValue.toLowerCase() !== "collected") {
         // Iterate through each email address in the cell (delimited by semicolon)
         for (var j = 0; j < emailRecipients.length; j++) {
           var emailRecipient = emailRecipients[j];
@@ -42,19 +42,20 @@ function sendEmailIfCheckboxUnchecked() {
           if (emailRecipient) {
             // Customize your email message here
             var subject = "Reminder: Request for laptop : " + company;
-            var message = "Dear " + firstName + ",\n\n" +
-              "This is regarding your request for laptop(s) from Engineering Good. We are pleased to inform you that the laptop(s) are ready for collection.\n\n" +
-              "I kindly request you to sign the Delivery Order (DO) attached in this email, digitally, and email it back to me. Alternatively, you may sign it physically by printing and bringing it along during your visit.\n\n" +
-              "You are welcome to collect the laptop(s) from our Bendemeer office at the following address, anytime during our office hours, with or without an appointment:\n\n" +
-              "Address:\n" +
-              "B-Central, 994 Bendemeer Road, #02-04,\n" +
-              "Singapore 339943\n\n" +
-              "Nearest MRT exit:\n" +
-              "Boon Keng MRT station Exit B.\n\n" +
-              "Office hours:\n" +
-              "On weekdays, from 10 a.m. to 6 p.m. (excluding Public Holidays)\n\n" +
-              "If you have any further questions or concerns, please do not hesitate to contact us at 81246085.\n\n" +
-              "Thank you.\n\n Sandeep Dadwall - Project Executive";
+            var htmlMessage = "<p>Dear " + firstName + ",</p>" +
+    "<p>This is regarding your request for laptop(s) from Engineering Good. We are pleased to inform you that the laptop(s) are ready for collection.</p>" +
+    "<p>I kindly request you to sign the Delivery Order (DO) attached in this email, digitally, and email it back to me. Alternatively, you may sign it physically by printing and bringing it along during your visit.</p>" +
+    "<p>You are welcome to collect the laptop(s) from our Bendemeer office at the following address, anytime during our office hours, with or without an appointment:</p>" +
+    "<p><b>Address:</b><br>" +
+    "B-Central, 994 Bendemeer Road, #02-04,<br>" +
+    "Singapore 339943</p>" +
+    "<p><b>Nearest MRT exit:</b><br>" +
+    "Boon Keng MRT station Exit B.</p>" +
+    "<p><b>Office hours:</b><br>" +
+    "On weekdays, from 10 a.m. to 6 p.m. (excluding Public Holidays)</p>" +
+    "<p>If you have any further questions or concerns, please do not hesitate to contact us at 81246085.</p>" +
+    "<p>Thank you.</p><p>Sandeep Dadwall - Project Executive</p>";
+
             
             // Search for the attachment based on company and batch
             var attachment = findAttachmentInFolder("https://drive.google.com/drive/folders/1r8cBIVRzlKttk4NjuYviwl2L3_rYIxd0?usp=drive_link", company, batch); // Replace with your folder URL
@@ -64,7 +65,7 @@ function sendEmailIfCheckboxUnchecked() {
               MailApp.sendEmail({
                 to: emailRecipient,
                 subject: subject,
-                body: message,
+                htmlBody: htmlMessage,
                 attachments: [attachment.getAs(MimeType.PDF)] // Attach the document as PDF
               });
             } else {

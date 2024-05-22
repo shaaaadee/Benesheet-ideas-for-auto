@@ -1,0 +1,63 @@
+var FOLDER_ID = '17Yf863WhoeiS4EbP-kNjOVtZBBwtKU1v';
+var SHEET_ID = '1A4acf8juawHdBBrKIR3Q8DiMTbQoaAp0f8Efg4YA_qA';
+
+function checkFolderUpdates() {
+  try {
+    Logger.log("Starting folder update check");
+
+    var folder = DriveApp.getFolderById(FOLDER_ID);
+    Logger.log("Accessed folder: " + folder.getName());
+
+    var files = folder.getFiles();
+    var sheet = SpreadsheetApp.openById(SHEET_ID).getActiveSheet();
+    Logger.log("Accessed sheet: " + sheet.getName());
+
+    while (files.hasNext()) {
+      var file = files.next();
+      var fileName = file.getName();
+      var url = file.getUrl();
+      var companyAndBatch = getCompanyAndBatchFromFileName(fileName);
+      Logger.log("Extracted company and batch: " + JSON.stringify(companyAndBatch));
+
+      if (companyAndBatch) {
+        var row = findRowForCompanyAndBatch(sheet, companyAndBatch.company, companyAndBatch.batch);
+        if (row) {
+          Logger.log("Found matching row: " + row);
+          var attachmentFormula = '=HYPERLINK("' + url + '", "' + fileName + '")';
+          sheet.getRange('W' + row).setFormula(attachmentFormula);
+          Logger.log('File ' + fileName + ' uploaded to row ' + row);
+
+          // Tick the checkbox in column V (22)
+          sheet.getRange('V' + row).setValue(true);
+          Logger.log('Checkbox ticked for row ' + row);
+        } else {
+          Logger.log("No matching row found for company: " + companyAndBatch.company + ", batch: " + companyAndBatch.batch);
+        }
+      } else {
+        Logger.log("No valid company and batch extracted from file name: " + fileName);
+      }
+    }
+
+    Logger.log("Folder update check completed");
+  } catch (error) {
+    Logger.log("Error in checkFolderUpdates: " + error.message);
+  }
+}
+
+function getCompanyAndBatchFromFileName(fileName) {
+  var parts = fileName.match(/(.+?) Batch (\d+) \d+/);
+  if (parts && parts.length >= 3) {
+    return { company: parts[1].trim(), batch: parseInt(parts[2]) };
+  }
+  return null;
+}
+
+function findRowForCompanyAndBatch(sheet, company, batch) {
+  var data = sheet.getDataRange().getValues();
+  for (var i = 0; i < data.length; i++) {
+    if (data[i][2] == company && data[i][3] == batch) {
+      return i + 1; // Adding 1 to convert 0-based index to 1-based row number
+    }
+  }
+  return null;
+}

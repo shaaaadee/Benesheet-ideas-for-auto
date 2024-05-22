@@ -1,0 +1,69 @@
+function onEdit(e) {
+  try {
+    if (!e) {
+      throw new Error("Event object is undefined.");
+    }
+
+    var sheet = e.source.getActiveSheet();
+    var range = e.range;
+    var value = e.value;
+
+    // Check if the edited cell is a checkbox in column V (22) and is checked
+    if (range.getColumn() == 22 && value == 'TRUE') {
+      var company = sheet.getRange(range.getRow(), 3).getValue();
+      var batch = sheet.getRange(range.getRow(), 4).getValue(); 
+      var folderUrl = 'https://drive.google.com/drive/folders/1r8cBIVRzlKttk4NjuYviwl2L3_rYIxd0?usp=drive_link'; // Replace with the URL of the folder containing the PDFs
+      
+      // Search for the attachment based on company and batch
+      var attachment = findAttachmentInFolder(folderUrl, company, batch);
+      
+      if (attachment) {
+        // Get the URL of the attachment
+        var fileUrl = 'https://drive.google.com/uc?id=' + attachment.getId();
+        // Set the clickable link in column W (23)
+        sheet.getRange(range.getRow(), 23).setValue(fileUrl);
+      } else {
+        Logger.log("Attachment not found for company: " + company + " and batch: " + batch);
+      }
+    }
+  } catch (error) {
+    Logger.log("Error: " + error.message);
+  }
+}
+
+// Function to find attachment based on company and batch within a specific folder
+function findAttachmentInFolder(folderUrl, company, batch) {
+  // Extract folder ID from folder URL
+  var folderId = getFolderIdFromUrl(folderUrl);
+  
+  if (folderId) {
+    // Get folder by ID
+    var folder = DriveApp.getFolderById(folderId);
+    var files = folder.getFiles();
+    
+    // Iterate through files in the folder
+    while (files.hasNext()) {
+      var file = files.next();
+      var fileName = file.getName();
+      
+      // Check if the file name contains the company name and batch
+      if (fileName.indexOf(company) !== -1 && fileName.indexOf(batch) !== -1) {
+        return file;
+      }
+    }
+  } else {
+    Logger.log("Folder not found for URL: " + folderUrl);
+  }
+  
+  return null; // Return null if no attachment is found
+}
+
+// Function to extract folder ID from Google Drive folder URL
+function getFolderIdFromUrl(url) {
+  var id = "";
+  var match = /\/folders\/([a-zA-Z0-9-_]+)/.exec(url);
+  if (match) {
+    id = match[1];
+  }
+  return id;
+}

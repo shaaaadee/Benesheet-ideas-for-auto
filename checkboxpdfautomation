@@ -1,5 +1,5 @@
-var FOLDER_ID = '17Yf863WhoeiS4EbP-kNjOVtZBBwtKU1v';
-var SHEET_ID = '1A4acf8juawHdBBrKIR3Q8DiMTbQoaAp0f8Efg4YA_qA';
+const FOLDER_ID = '1mD9HiYizcwVJlzoynubELS2aYevzHneu';
+const SHEET_ID = '1A4acf8juawHdBBrKIR3Q8DiMTbQoaAp0f8Efg4YA_qA';
 
 function checkFolderUpdates() {
   try {
@@ -30,6 +30,10 @@ function checkFolderUpdates() {
           // Tick the checkbox in column V (22)
           sheet.getRange('V' + row).setValue(true);
           Logger.log('Checkbox ticked for row ' + row);
+
+          // Change the drop-down in column O to "Collected"
+          sheet.getRange('O' + row).setValue("Collected");
+          Logger.log('Drop-down in column O set to "Collected" for row ' + row);
         } else {
           Logger.log("No matching row found for company: " + companyAndBatch.company + ", batch: " + companyAndBatch.batch);
         }
@@ -61,3 +65,4 @@ function findRowForCompanyAndBatch(sheet, company, batch) {
   }
   return null;
 }
+

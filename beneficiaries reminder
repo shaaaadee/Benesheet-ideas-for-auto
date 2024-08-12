@@ -1,4 +1,5 @@
 function sendEmailIfCheckboxUnchecked() {
+
   // Display a confirmation dialog
   var ui = SpreadsheetApp.getUi();
   var response = ui.alert(
@@ -9,7 +10,6 @@ function sendEmailIfCheckboxUnchecked() {
 
   // Check the user's response
   if (response == ui.Button.YES) {
-
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
 
     // Get the data range for columns C to Z
@@ -33,7 +33,7 @@ function sendEmailIfCheckboxUnchecked() {
       var dropdownValue = dropdownValues[i][0]; // Assuming dropdown values are in the same row as the checkboxes
       
       // Check if checkbox is not checked (assuming unchecked checkbox value is false) and dropdown value is not "cancelled"
-      if (checkboxValue !== true && dropdownValue.toLowerCase() !== "cancelled"&& dropdownValue.toLowerCase() !== "collected") {
+      if (checkboxValue !== true && dropdownValue.toLowerCase() !== "cancelled" && dropdownValue.toLowerCase() !== "collected") {
         // Iterate through each email address in the cell (delimited by semicolon)
         for (var j = 0; j < emailRecipients.length; j++) {
           var emailRecipient = emailRecipients[j];
@@ -41,24 +41,28 @@ function sendEmailIfCheckboxUnchecked() {
           // Send email if the email recipient is valid
           if (emailRecipient) {
             // Customize your email message here
-            var subject = "Reminder: Request for laptop : " + company;
+            var subject = "Request for laptop: " + company + " Batch " + batch;
             var htmlMessage = "<p>Dear " + firstName + ",</p>" +
-    "<p>This is regarding your request for laptop(s) from Engineering Good. We are pleased to inform you that the laptop(s) are ready for collection.</p>" +
-    "<p>I kindly request you to sign the Delivery Order (DO) attached in this email, digitally, and email it back to me. Alternatively, you may sign it physically by printing and bringing it along during your visit.</p>" +
-    "<p>You are welcome to collect the laptop(s) from our Bendemeer office at the following address, anytime during our office hours, with or without an appointment:</p>" +
-    "<p><b>Address:</b><br>" +
-    "B-Central, 994 Bendemeer Road, #02-04,<br>" +
-    "Singapore 339943</p>" +
-    "<p><b>Nearest MRT exit:</b><br>" +
-    "Boon Keng MRT station Exit B.</p>" +
-    "<p><b>Office hours:</b><br>" +
-    "On weekdays, from 10 a.m. to 6 p.m. (excluding Public Holidays)</p>" +
-    "<p>If you have any further questions or concerns, please do not hesitate to contact us at 81246085.</p>" +
-    "<p>Thank you.</p><p>Sandeep Dadwall - Project Executive</p>";
+              "<p>This is regarding your request for laptop(s) from Engineering Good. We are pleased to inform you that the laptop(s) are ready for collection.</p>" +
+              "<p>I kindly request you to sign the Delivery Order (DO) attached in this email, digitally, and email it back to me. Alternatively, you may sign it physically by printing and bringing it along during your visit.</p>" +
+              "<p>You are welcome to collect the laptop(s) from our Bendemeer office at the following address, anytime during our office hours, with or without an appointment:</p>" +
+              "<p><b>Address:</b><br>" +
+              "41 Jalan Pemimpin, #03-06A & #03-06B Kong Beng Industrial Building, <br>" +
+              "Singapore 577186</p>" +
+              "<p><b>Nearest MRT exit:</b><br>" +
+              "Marymount MRT station</p>" +
+              "<p><b>Office hours:</b><br>" +
+              "On weekdays, from 10 a.m. to 5.30 p.m. (excluding Wednesdays and Public Holidays)</p>" +
+              "<p>If you have any further questions or concerns, please do not hesitate to contact us at 81246085.</p>" +
+              "<p>Thank you.</p>" +
+              getSignature(); // Add the signature
 
-            
             // Search for the attachment based on company and batch
-            var attachment = findAttachmentInFolder("https://drive.google.com/drive/folders/1r8cBIVRzlKttk4NjuYviwl2L3_rYIxd0?usp=drive_link", company, batch); // Replace with your folder URL
+            var attachment = findAttachmentInFolder(
+              "https://drive.google.com/drive/folders/1r8cBIVRzlKttk4NjuYviwl2L3_rYIxd0?usp=drive_link",
+              company,
+              batch
+            ); // Replace with your folder URL
             
             if (attachment) {
               // Send email with attachment
@@ -81,7 +85,12 @@ function sendEmailIfCheckboxUnchecked() {
   }
 }
 
-// Function to find attachment based on company and batch within a specific folder
+function onOpen() {
+  var ui = SpreadsheetApp.getUi();
+  ui.createMenu('Emailer')
+      .addItem('Send Emails', 'sendEmailIfCheckboxUnchecked')
+      .addToUi();
+}
 function findAttachmentInFolder(folderUrl, company, batch) {
   // Extract folder ID from folder URL
   var folderId = getFolderIdFromUrl(folderUrl);
@@ -108,7 +117,6 @@ function findAttachmentInFolder(folderUrl, company, batch) {
   return null; // Return null if no attachment is found
 }
 
-// Function to extract folder ID from Google Drive folder URL
 function getFolderIdFromUrl(url) {
   var id = "";
   var match = /\/folders\/([a-zA-Z0-9-_]+)/.exec(url);
@@ -118,19 +126,104 @@ function getFolderIdFromUrl(url) {
   return id;
 }
 
-function onOpen() {
-  var ui = SpreadsheetApp.getUi();
-  ui.createMenu('Emailer')
-      .addItem('Send Emails', 'sendEmailIfCheckboxUnchecked')
-      .addToUi();
+function getSignature() {
+  return `
+    <div dir="ltr" class="gmail_signature" data-smartmail="gmail_signature">
+      <div dir="ltr">
+        <span>
+          <div dir="ltr" style="margin-left:0pt" align="left">
+            <table style="border:none;border-collapse:collapse">
+              <colgroup>
+                <col width="111">
+                <col width="235">
+                <col width="51">
+              </colgroup>
+              <tbody>
+                <tr style="height:96.75pt">
+                  <td style="vertical-align:top;padding:5pt 6pt 5pt 5pt;overflow:hidden">
+                    <p dir="ltr" style="line-height:1.9871999999999999;margin-top:0pt;margin-bottom:0pt">
+                      <span style="font-size:11pt;font-family:Arial,sans-serif;color:rgb(0,0,0);background-color:transparent;vertical-align:baseline">
+                        <span style="border:none;display:inline-block;overflow:hidden;width:96px;height:104px">
+                          <img src="https://lh7-us.googleusercontent.com/VjEJMNTM9rPR5AYM327ZXaen-41fNimV-jKghOO2OkqptacNWZBaTexcDLQvEDNFiuVI5e2oI4aHB0VBRg96ewbx5uEa5U9Rf1szRzFUJK6Acs3fIWbXZOM46uxn4qWOcMapUk2e82_-5UphsvWNb0g" width="96" height="104" style="margin-left:0px;margin-top:0px" crossorigin="" class="CToWUd" data-bit="iit">
+                        </span>
+                      </span>
+                    </p>
+                  </td>
+                  <td style="border-right:solid #ed7d31 1.7999999999999998pt;vertical-align:top;padding:5pt 6pt 5pt 6pt;overflow:hidden">
+                    <p dir="ltr" style="line-height:1.9871999999999999;margin-top:0pt;margin-bottom:0pt">
+                      <font color="#787878" face="Arial, sans-serif">
+                        <span style="font-size:19.3333px">Sandeep Singh Dadwall</span>
+                      </font>
+                    </p>
+                    <p dir="ltr" style="line-height:1.9871999999999999;margin-top:0pt;margin-bottom:0pt">
+                      <span style="font-size:10.5pt;font-family:Arial,sans-serif;color:rgb(120,120,120);background-color:transparent;font-weight:700;vertical-align:baseline">Project Executive - Laptop Refurbishment</span>
+                    </p>
+                    <p dir="ltr" style="line-height:1.9871999999999999;margin-top:0pt;margin-bottom:0pt">
+                      <span style="font-size:8.5pt;font-family:Arial,sans-serif;color:rgb(237,125,49);background-color:transparent;vertical-align:baseline">email:  </span>
+                      <span style="background-color:transparent;color:rgb(17,85,204);font-family:Arial,sans-serif;font-size:8.5pt">
+                        <a href="mailto:sandeep@engineeringgood.org" target="_blank">sandeep@engineeringgood.org</a>
+                      </span>
+                    </p>
+                    <p dir="ltr" style="line-height:1.9871999999999999;margin-top:0pt;margin-bottom:0pt">
+                      <span style="font-size:8.5pt;font-family:Arial,sans-serif;color:rgb(237,125,49);background-color:transparent;vertical-align:baseline">website:</span>
+                      <a href="http://engineeringgood.org/" target="_blank" data-saferedirecturl="https://www.google.com/url?q=http://engineeringgood.org/&amp;source=gmail&amp;ust=1721786190183000&amp;usg=AOvVaw2IIBTTtqNEy7dJxQGhk62Y">
+                        <span style="font-size:8.5pt;font-family:Arial,sans-serif;color:rgb(237,125,49);background-color:transparent;vertical-align:baseline"></span>
+                        <span style="font-size:8.5pt;font-family:Arial,sans-serif;color:rgb(120,120,120);background-color:transparent;vertical-align:baseline">http://engineeringgood.org</span>
+                      </a>
+                    </p>
+                  </td>
+                  <td style="border-left:solid #ed7d31 1.7999999999999998pt;vertical-align:top;padding:5pt 5pt 5pt 6pt;overflow:hidden">
+                    <p dir="ltr" style="line-height:1.9871999999999999;margin-top:0pt;margin-bottom:0pt">
+                      <span style="font-size:11pt;font-family:Arial,sans-serif;color:rgb(34,34,34);background-color:transparent;vertical-align:baseline">
+                        <span style="border:none;display:inline-block;overflow:hidden;width:25px;height:25px">
+                          <img src="https://lh7-us.googleusercontent.com/gbFJIxoKUi9WMnYlu7FwwA1vW-P93LxlsI4l_WbFkeKynfj7iIprAyxc2d5qC6GIHh74zArr8vAtZlvvQWaPqSfD8Jkx2v_rUWWo9MdScV7FhmeumIXG3R4jxhrqrnvt9avFyy-PoAFq34IMHo0ocww" width="25" height="25" style="margin-left:0px;margin-top:0px" crossorigin="" class="CToWUd" data-bit="iit">
+                        </span>
+                      </span>
+                    </p>
+                    <p dir="ltr" style="line-height:1.9871999999999999;margin-top:0pt;margin-bottom:0pt">
+                      <span style="font-size:11pt;font-family:Arial,sans-serif;color:rgb(34,34,34);background-color:transparent;vertical-align:baseline">
+                        <span style="border:none;display:inline-block;overflow:hidden;width:24px;height:24px">
+                          <img src="https://lh7-us.googleusercontent.com/_k2L81rjL7PjcyOHC6xxJhyVZVGOykdPPzKbVKoDEI9RmQh2fii6_eXzQC_bgXXl2GTHKEhy3dT7K7gh0rwEVg2ik-ruV-lN2Bm0oFjhzejvLkB6YozeGX2797uAcSuY2EshsPQdazxoM9qnW5JlMOQ" width="24" height="24" style="margin-left:0px;margin-top:0px" crossorigin="" class="CToWUd" data-bit="iit">
+                        </span>
+                      </span>
+                    </p>
+                    <p dir="ltr" style="line-height:1.9871999999999999;margin-top:0pt;margin-bottom:0pt">
+                      <span style="font-size:11pt;font-family:Arial,sans-serif;color:rgb(34,34,34);background-color:transparent;vertical-align:baseline">
+                        <span style="border:none;display:inline-block;overflow:hidden;width:23px;height:23px">
+                          <img src="https://lh7-us.googleusercontent.com/2b41HNwr_KMIX80RkP82qaEoTTTeops210SrRgpfBo6Z8X645Hvw4jOFymTK_nV6RVLDJAQiEc8NIz4CR2gl_5BNsutmdEL_5Zh8BbTN_RKNAJqbGQZ2g3Hap9npOfKoqXKf8ULByto9FHZEiPSupNg" width="23" height="23" style="margin-left:0px;margin-top:0px" crossorigin="" class="CToWUd" data-bit="iit">
+                        </span>
+                      </span>
+                    </p>
+                    <p dir="ltr" style="line-height:1.9871999999999999;margin-top:0pt;margin-bottom:0pt">
+                      <span style="font-size:11pt;font-family:Arial,sans-serif;color:rgb(34,34,34);background-color:transparent;vertical-align:baseline">
+                        <span style="border:none;display:inline-block;overflow:hidden;width:23px;height:23px">
+                          <img src="https://lh7-us.googleusercontent.com/docsz/AD_4nXfIdOhRRSs-uX1C6mr-ytaw_vbLWAz6koFj_HaHIAddgx-QpwnMQXb5pHTHW25Kvao41MK3zhTJ_qG-NfQCMjea3hpHef4F6fqEmjhOQAJ63dOlPqWSLmNeXJrEpbWR67gcyu38MP5hKYyvSC8EgGNT6U6-?key=pRal1tGxjvnT9NqsIAPo6w" width="23" height="23" style="margin-left:0px;margin-top:0px" crossorigin="" class="CToWUd" data-bit="iit">
+                        </span>
+                      </span>
+                    </p>
+                  </td>
+                </tr>
+                <tr style="height:15.75pt">
+                  <td colspan="3" style="border-top:solid #ed7d31 3.5999999999999996pt;vertical-align:top;padding:5pt 6pt 5pt 6pt;overflow:hidden">
+                    <p dir="ltr" style="line-height:1.9871999999999999;margin-top:0pt;margin-bottom:0pt">
+                      <span style="font-size:9pt;font-family:Arial,sans-serif;color:rgb(120,120,120);background-color:transparent;vertical-align:baseline">
+                        Engineering Good is a Singapore-based NGO that empowers disadvantaged communities by improving their quality of life through sustainable engineering solutions. 
+                        <a href="http://engineeringgood.org/" target="_blank" data-saferedirecturl="https://www.google.com/url?q=http://engineeringgood.org/&amp;source=gmail&amp;ust=1721786190183000&amp;usg=AOvVaw2IIBTTtqNEy7dJxQGhk62Y">
+                          <span style="font-size:9pt;font-family:Arial,sans-serif;color:rgb(17,85,204);background-color:transparent;vertical-align:baseline">Click here to find out more about our projects!</span>
+                        </a>
+                      </span>
+                    </p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </span>
+      </div>
+    </div>
+  `;
 }
 
 function showAlert() {
-  var ui = SpreadsheetApp.getUi();
-
-  var result = ui.alert(
-    'End Emailer',
-    'Emailer has stopped.',
-    ui.ButtonSet.OK
-  );
+  SpreadsheetApp.getUi().alert("You have cancelled the email sending.");
 }
